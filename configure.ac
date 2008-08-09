@@ -27,5 +27,6 @@ AC_C_CONST
 AC_DEFINE([NFQ_PACKET_BUFFER_SIZE],4096,[Define the size of NFQ buffer])
 
 AC_CONFIG_FILES([Makefile
+                 man/Makefile
                  src/Makefile])
 AC_OUTPUT

@@ -1,0 +1,91 @@
+.\" Copyright (c) 2008 Vincent Bernat <bernat@luffy.cx>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate: August 9 2008 $
+.Dt UDPPROXY 8
+.Os
+.Sh NAME
+.Nm udpproxy
+.Nd UDP proxy using Netfilter netlink-queue
+.Sh SYNOPSIS
+.Nm
+.Op Fl d
+.Op Fl q Ar queue number
+.Op Fl e Ar remote command
+.Op Fl u Ar uid
+.Op Fl g Ar gid
+.Sh DESCRIPTION
+.Nm
+is a daemon intercepting UDP packets with the help of
+.Em Netfilter
+netlink-queue support. Packets are then sent to another process to be
+processed. This process can be a local process or a remote process via
+.Xr ssh 1 .
+.Pp
+.Nm
+needs to receive packets from Netfilter using
+.Em NFQUEUE
+target. You need to setup a rule like this:
+.Bd -literal -offset indent
+iptables -A OUTPUT -p udp --dport 161 \\
+       --destination 172.16.100.0/23 -j NFQUEUE --queue-num 10
+.Ed
+.Pp
+All packets matching the rule will be sent to
+.Nm
+that will send them to the remote process that will act as a proxy.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl d
+Enable debug.
+If this option is specified,
+.Nm
+will output debug messages to
+.Em stderr .
+.It Fl q Ar queue number
+Specify the queue number to listen to. In the example above, this is
+10. Without this option,
+.Nm
+will act as the remote proxy and will wait for packets to be sent on
+its standard input.
+.It Fl e Ar remote command
+Specify how to invoke the remote process. If this option is not
+specified,
+.Nm
+will invoke itself. You can use
+.Xr ssh 1 :
+.Bd -literal -offset indent
+udpproxy -e "ssh remotehost udpproxy"
+.Ed
+.It Fl u Ar uid
+Invoke the remote process as the given UID. 
+.Nm
+needs root
+privileges to receives packets from
+.Em Netfilter
+and to send back packets when receiving answers. The remote
+.Nm
+does not need any privilege.
+.It Fl g Ar gid
+Invoke the remote process as the given GID.
+.El
+.Sh SEE ALSO
+.Xr ssh 1
+.Sh AUTHOR
+.An -nosplit
+The
+.Nm
+program was written by
+.An Vincent Bernat Aq bernat@luffy.cx .
