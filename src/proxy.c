@@ -42,6 +42,7 @@ int	 nfq_process(struct nfq_q_handle *, struct nfgenmsg *,
     struct nfq_data *, void *);
 int	 nfq_init(int, struct nfq_handle **, struct nfq_q_handle **, int *);
 void	 nfq_shut(struct nfq_handle *, struct nfq_q_handle *);
+int	 start_remote(const char *, int *, int *, uid_t, uid_t);
 
 static void	 setup_signals(void);
 static void	 remote_incoming(int, short, void *);
@@ -335,7 +336,7 @@ proxy_shutdown(int fd, short event, void *arg)
 }
 
 int
-start_remote(const char *cmd, int *read, int *write)
+start_remote(const char *cmd, int *read, int *write, uid_t uid, uid_t gid)
 {
 	int pipeout[2], pipein[2];
 	if ((pipe(pipeout) == -1) || (pipe(pipein) == -1)) {
@@ -354,6 +355,11 @@ start_remote(const char *cmd, int *read, int *write)
 		/* Child */
 		close(pipeout[1]);
 		close(pipein[0]);
+		/* Change uid/gid */
+		if ((gid > 0) && (setgid(gid) == -1))
+			fatal("unable to change uid");
+		if ((uid > 0) && (setuid(uid) == -1))
+			fatal("unable to change uid");
 		/* Plug to stdin/stdout */
 		dup2(pipeout[0], STDIN_FILENO);
 		dup2(pipein[1], STDOUT_FILENO);
@@ -414,12 +420,13 @@ main(int argc, char **argv)
 	struct nfq_handle *nfq;
 	struct nfq_q_handle *qh;
 	int remotein, remoteout;
+	uid_t uid = -1, gid = -1;
 
 	struct event evqueue, evrin, evexpire;
         struct timeval tv;
         struct states *udpstates;
 
-	while ((ch = getopt(argc, argv, "dq:e:")) != -1) {
+	while ((ch = getopt(argc, argv, "dq:e:u:g:")) != -1) {
 		switch (ch) {
 		case 'd':
 			debug++;
@@ -429,6 +436,12 @@ main(int argc, char **argv)
 			break;
 		case 'e':
 			cmd = optarg;
+			break;
+		case 'u':
+			uid = atoi(optarg);
+			break;
+		case 'g':
+			gid = atoi(optarg);
 			break;
 		default:
 			usage();
@@ -446,7 +459,8 @@ main(int argc, char **argv)
 
         if (queue != -1) {
 		/* Packets from remote */
-		if (start_remote(cmd, &remotein, &remoteout) == -1)
+		if (start_remote(cmd, &remotein, &remoteout,
+			uid, gid) == -1)
 			fatalx("unable to start remote");
 		event_set(&evrin, remotein, EV_READ | EV_PERSIST,
 		    remote_incoming, &evrin);
