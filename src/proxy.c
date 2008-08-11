@@ -119,8 +119,8 @@ udp_incoming(int fd, short event, void *arg)
 	ip_header->check = cksum((unsigned char *)ip_header,
 	    sizeof(struct iphdr));
 
-	if (send(STDOUT_FILENO, buffer, rv +
-		sizeof(struct udphdr) + sizeof(struct iphdr), MSG_DONTWAIT) == -1)
+	if (write(STDOUT_FILENO, buffer, rv +
+		sizeof(struct udphdr) + sizeof(struct iphdr)) == -1)
 		LLOG_WARN("unable to send back UDP packet");
 }
 
@@ -288,7 +288,7 @@ nfq_process(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
 
 	/* We now send the packet to the remote end */
 	remoteout = *(int*)data;
-	if (send(remoteout, payload, payload_length, MSG_DONTWAIT) == -1)
+	if (write(remoteout, payload, payload_length) == -1)
 		LLOG_WARN("unable to send packet to remote end");
 
 	/* Drop the package, we will pass it through our proxy */
