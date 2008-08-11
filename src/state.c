@@ -132,6 +132,7 @@ void
 state_expire(struct states *ss, int delay1, int delay2)
 {
 	struct statenode *var, *nxt;
+	int i = 0;
 	time_t cur = time(NULL);
 	for (var = SPLAY_MIN(states, ss); var != NULL; var = nxt) {
 		nxt = SPLAY_NEXT(states, ss, var);
@@ -143,6 +144,9 @@ state_expire(struct states *ss, int delay1, int delay2)
                         event_del(&var->state.ev);
 			close(var->state.socket);
 			free(var);
+			i++;
 		}
 	}
+	if (i > 0)
+		LLOG_DEBUG("%d states have been expired", i);
 }
