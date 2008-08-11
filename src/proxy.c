@@ -26,8 +26,10 @@
 #include <netinet/ip.h>
 #include <netinet/udp.h>
 
+#if !CLIENT_ONLY
 #include <linux/netfilter.h>
 #include <libnetfilter_queue/libnetfilter_queue.h>
+#endif
 
 
 extern const char	*__progname;
@@ -37,15 +39,19 @@ void	 proxy_shutdown(int, short, void *);
 void	 loop(void);
 void	 expire_states(int, short, void *);
 void	 udp_incoming(int, short, void *);
+#if !CLIENT_ONLY
 void	 nfq_incoming(int, short, void *);
 int	 nfq_process(struct nfq_q_handle *, struct nfgenmsg *,
     struct nfq_data *, void *);
 int	 nfq_init(int, struct nfq_handle **, struct nfq_q_handle **, int *);
 void	 nfq_shut(struct nfq_handle *, struct nfq_q_handle *);
 int	 start_remote(const char *, int *, int *, uid_t, uid_t);
+#endif
 
 static void	 setup_signals(void);
+#if !CLIENT_ONLY
 static void	 remote_incoming(int, short, void *);
+#endif
 static void	 local_incoming(int, short, void *);
 
 int keep_running = 1;
@@ -54,7 +60,11 @@ void
 usage()
 {
 	extern const char *__progname;
+#if !CLIENT_ONLY
 	fprintf(stderr, "usage: %s [-d] [-q queue] [-e cmd]\n", __progname);
+#else
+	fprintf(stderr, "usage: %s [-d]\n", __progname);
+#endif
 	exit(1);
 }
 
@@ -114,6 +124,7 @@ udp_incoming(int fd, short event, void *arg)
 		LLOG_WARN("unable to send back UDP packet");
 }
 
+#if !CLIENT_ONLY
 /* Proxy process receives a packet from the remote end */
 static void
 remote_incoming(int fd, short event, void *arg)
@@ -165,6 +176,7 @@ end:
 	n = buf;
 	l = 0;
 }
+#endif
 
 /* Distant process receives a packet to transmit from the proxy */
 static void
@@ -242,6 +254,7 @@ end:
 	l = 0;
 }
 
+#if !CLIENT_ONLY
 void
 nfq_incoming(int fd, short event, void *arg)
 {
@@ -326,15 +339,17 @@ nfq_shut(struct nfq_handle *nfq, struct nfq_q_handle *qh)
 	nfq_unbind_pf(nfq, AF_INET);
 	nfq_close(nfq);
 }
+#endif
 
 void
 proxy_shutdown(int fd, short event, void *arg)
 {
 	keep_running = 0;
-	if (EVENT_SIGNAL((struct event *)arg) == SIGCHLD)
+	if (EVENT_SIGNAL(((struct event *)arg)) == SIGCHLD)
 		LLOG_WARNX("remote process died");
 }
 
+#if !CLIENT_ONLY
 int
 start_remote(const char *cmd, int *read, int *write, uid_t uid, uid_t gid)
 {
@@ -376,6 +391,7 @@ start_remote(const char *cmd, int *read, int *write, uid_t uid, uid_t gid)
 	/* Make the compiler happy */
 	return -1;
 }
+#endif
 
 static void
 setup_signals()
@@ -431,6 +447,7 @@ main(int argc, char **argv)
 		case 'd':
 			debug++;
 			break;
+#if !CLIENT_ONLY
 		case 'q':
 			queue = atoi(optarg);
 			break;
@@ -443,6 +460,7 @@ main(int argc, char **argv)
 		case 'g':
 			gid = atoi(optarg);
 			break;
+#endif
 		default:
 			usage();
 		}
@@ -457,6 +475,7 @@ main(int argc, char **argv)
 
 	event_init();
 
+#if !CLIENT_ONLY
         if (queue != -1) {
 		/* Packets from remote */
 		if (start_remote(cmd, &remotein, &remoteout,
@@ -475,6 +494,7 @@ main(int argc, char **argv)
 		if (event_add(&evqueue, NULL) == -1)
 			fatal("unable to set event for netfilter queue");
 	} else {
+#endif
 		/* States expiration */
 		udpstates = state_initialize();
 		tv.tv_usec = 0;
@@ -489,15 +509,20 @@ main(int argc, char **argv)
 		    local_incoming, udpstates);
 		if (event_add(&evrin, NULL) == -1)
 			fatal("unable to set event for incoming pipe");
+#if !CLIENT_ONLY
 	}
+#endif
 
 	setup_signals();
 	loop();
 
+#if !CLIENT_ONLY
 	if (queue != -1) {
 		nfq_shut(nfq, qh);
-		LLOG_INFO("shutdown");
 	}
+#endif
+
+	LLOG_INFO("shutdown");
 
 	return 0;
 }

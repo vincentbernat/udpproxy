@@ -12,7 +12,8 @@ AC_PROG_CC
 
 # Checks for libraries.
 AC_CHECK_LIB([netfilter_queue], [nfq_open], [],
-	[AC_MSG_ERROR([libnetfilter-queue was not found])])
+        [AC_MSG_NOTICE([without netfilter-queue, only client support will be enabled])
+         AC_DEFINE([CLIENT_ONLY], 1, [Only compile client support])])
 AC_CHECK_LIB([event], [event_set], [],
 	[AC_MSG_ERROR([libevent was not found])])
 
