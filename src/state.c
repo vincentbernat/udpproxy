@@ -39,10 +39,11 @@ int
 state_compare(struct statenode *s1, struct statenode *s2)
 {
         int rc;
-	rc = ((s1->state.sport - s2->state.sport) ||
-	    (s1->state.destination.s_addr - s2->state.destination.s_addr) ||
-	    (s1->state.dport - s2->state.dport) ||
-	    (s1->state.source.s_addr - s2->state.source.s_addr));
+	if ((rc = s1->state.sport - s2->state.sport) == 0)
+		if ((rc = s1->state.destination.s_addr -
+			s2->state.destination.s_addr) == 0)
+			if ((rc = s1->state.dport - s2->state.dport) == 0)
+				rc = s1->state.source.s_addr - s2->state.source.s_addr;
         return rc;
 }
 
