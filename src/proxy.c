@@ -21,6 +21,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/ip.h>
@@ -385,6 +386,8 @@ start_remote(const char *cmd, int *read, int *write, uid_t uid, uid_t gid)
 		close(pipein[1]);
 		*read = pipein[0];
 		*write = pipeout[1];
+		if (fcntl(*write, F_SETFL, O_ASYNC) == -1)
+			LLOG_WARN("unable to set write pipe to non blocking mode");
 		return 0;
 	}
 	
@@ -495,6 +498,9 @@ main(int argc, char **argv)
 			fatal("unable to set event for netfilter queue");
 	} else {
 #endif
+		if (fcntl(STDOUT_FILENO, F_SETFL, O_ASYNC) == -1)
+			LLOG_WARN("unable to set standard output to non blocking mode");
+
 		/* States expiration */
 		udpstates = state_initialize();
 		tv.tv_usec = 0;
