@@ -140,9 +140,9 @@ state_expire(struct states *ss, int delay1, int delay2)
 			((cur - var->state.lastchange) > delay1)) ||
 		    ((var->state.count > 1) &&
 			((cur - var->state.lastchange) > delay2))) {
-			SPLAY_REMOVE(states, ss, var);
                         event_del(&var->state.ev);
 			close(var->state.socket);
+			SPLAY_REMOVE(states, ss, var);
 			free(var);
 			i++;
 		}

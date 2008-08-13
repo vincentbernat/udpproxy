@@ -38,7 +38,6 @@ extern const char	*__progname;
 void	 usage(void);
 void	 proxy_shutdown(int, short, void *);
 void	 loop(void);
-void	 expire_states(int, short, void *);
 void	 udp_incoming(int, short, void *);
 #if !CLIENT_ONLY
 void	 nfq_incoming(int, short, void *);
@@ -54,6 +53,7 @@ static void	 setup_signals(void);
 static void	 remote_incoming(int, short, void *);
 #endif
 static void	 local_incoming(int, short, void *);
+static void	 expire_states(int, short, void *);
 
 int keep_running = 1;
 
@@ -69,11 +69,20 @@ usage()
 	exit(1);
 }
 
-void
+static void
 expire_states(int fd, short event, void *arg)
 {
 	struct states *udpstates = (struct states *)arg;
+	static struct timeval tv;
+	static struct event evexpire;
+	LLOG_DEBUG("expiring states");
 	state_expire(udpstates, UDP_UNCONFIRMED_TTL, UDP_CONFIRMED_TTL);
+	tv.tv_usec = 0;
+	tv.tv_sec = 2;
+	event_set(&evexpire, -1, EV_TIMEOUT,
+	    expire_states, udpstates);
+	if (event_add(&evexpire, &tv) == -1)
+		fatal("unable to set timer for state expiration");
 }
 
 /* Distant process receives an UDP packet */
@@ -441,8 +450,7 @@ main(int argc, char **argv)
 	int remotein, remoteout;
 	uid_t uid = -1, gid = -1;
 
-	struct event evqueue, evrin, evexpire;
-        struct timeval tv;
+	struct event evqueue, evrin;
         struct states *udpstates;
 
 	while ((ch = getopt(argc, argv, "dq:e:u:g:")) != -1) {
@@ -503,12 +511,7 @@ main(int argc, char **argv)
 
 		/* States expiration */
 		udpstates = state_initialize();
-		tv.tv_usec = 0;
-		tv.tv_sec = 2;
-		event_set(&evexpire, -1, EV_TIMEOUT | EV_PERSIST,
-		    expire_states, udpstates);
-		if (event_add(&evexpire, &tv) == -1)
-			fatal("unable to set timer for state expiration");
+		expire_states(-1, 0, udpstates);
 
 		/* Packets from proxy */
 		event_set(&evrin, STDIN_FILENO, EV_READ | EV_PERSIST,
