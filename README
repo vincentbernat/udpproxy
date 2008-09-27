@@ -14,3 +14,6 @@ that sends large packets, you should create a dummy interface with
 a large MTU and route packets to this interface. udpproxy will then
 receives the packets unfragmented and forward them to the remote proxy
 which will relies on operating system to handle fragmentation.
+
+URL:
+ http://trac.luffy.cx/udpproxy
