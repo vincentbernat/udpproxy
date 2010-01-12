@@ -62,7 +62,7 @@ usage()
 {
 	extern const char *__progname;
 #if !CLIENT_ONLY
-	fprintf(stderr, "usage: %s [-d] [-q queue] [-e cmd]\n", __progname);
+	fprintf(stderr, "usage: %s [-d] [-q queue] [-e cmd] [ -u uid ] [ -g gid ]\n", __progname);
 #else
 	fprintf(stderr, "usage: %s [-d]\n", __progname);
 #endif
