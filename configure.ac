@@ -11,6 +11,9 @@ AC_CONFIG_HEADER([config.h])
 AC_PROG_CC
 
 # Checks for libraries.
+AC_CHECK_LIB([nfnetlink], [nfnl_fd], [],
+        [AC_MSG_NOTICE([without nfnetlink library, only client support will be enabled])
+         AC_DEFINE([CLIENT_ONLY], 1, [Only compile client support])])
 AC_CHECK_LIB([netfilter_queue], [nfq_open], [],
         [AC_MSG_NOTICE([without netfilter-queue, only client support will be enabled])
          AC_DEFINE([CLIENT_ONLY], 1, [Only compile client support])])
