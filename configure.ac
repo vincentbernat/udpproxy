@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT(udpproxy, 0.1, bernat@luffy.cx)
+AC_INIT(udpproxy, 0.2, bernat@luffy.cx)
 AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_SRCDIR([src/proxy.c])
 AC_CONFIG_HEADER([config.h])
