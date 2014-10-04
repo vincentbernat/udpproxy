@@ -143,7 +143,7 @@ remote_incoming(int fd, short event, void *arg)
 	static char *n = buf;	/* Current pointer */
 	static int l = 0;	/* Current length */
 	static int s = -1;
-	int rv;
+	int rv, opt;
 	struct iphdr* ip_header;
 	struct sockaddr_in sin;
 
@@ -173,6 +173,8 @@ remote_incoming(int fd, short event, void *arg)
 		LLOG_WARN("unable to open raw socket");
 		fatalx("cannot continue");
 	}
+	opt = IP_PMTUDISC_DONT;
+	setsockopt(s, IPPROTO_IP, IP_MTU_DISCOVER, &opt, sizeof(opt));
 	sin.sin_port = 0;
 	sin.sin_family = AF_INET;
 	memcpy(&sin.sin_addr, &ip_header->daddr, sizeof(struct in_addr));

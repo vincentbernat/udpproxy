@@ -77,6 +77,7 @@ state_get_or_create(struct states *ss, struct state *s,
 {
 	struct statenode find, *res;
         struct sockaddr_in dest;
+	int opt;
 
 	memcpy(&find.state, s, sizeof(struct state));
 	if ((res = SPLAY_FIND(states, ss, &find)) != NULL)
@@ -96,6 +97,10 @@ state_get_or_create(struct states *ss, struct state *s,
 		free(res);
 		return NULL;
 	}
+
+	opt = IP_PMTUDISC_DONT;
+	setsockopt(res->state.socket, IPPROTO_IP, IP_MTU_DISCOVER, &opt, sizeof(opt));
+
 	memset(&dest, 0, sizeof(struct sockaddr_in));
 	dest.sin_family = AF_INET;
 	dest.sin_port = htons(res->state.dport);
