@@ -293,7 +293,7 @@ nfq_process(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
 		return -1;
 	}
 	if ((payload_length = nfq_get_payload(nfdata,
-		    (char**)&payload)) == -1) {
+		    (unsigned char**)&payload)) == -1) {
 		LLOG_WARNX("unable to get payload");
 		return -1;
 	}
