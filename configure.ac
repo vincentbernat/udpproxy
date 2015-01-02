@@ -3,7 +3,9 @@
 
 AC_PREREQ(2.61)
 AC_INIT(udpproxy, 0.2, bernat@luffy.cx)
-AM_INIT_AUTOMAKE([foreign])
+AM_INIT_AUTOMAKE([foreign -Wall -Werror])
+AM_MAINTAINER_MODE
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
 AC_CONFIG_SRCDIR([src/proxy.c])
 AC_CONFIG_HEADER([config.h])
 
