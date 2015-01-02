@@ -34,12 +34,6 @@ You can get udpproxy from the git repository:
 
     $ git clone git://git.luffy.cx/udpproxy.git
 
-There is also a [cgit interface][2] where you can browse the sources
-or use [github][3].
-
-[2]: http://cgit.luffy.cx/udpproxy/
-[3]: https://github.com/vincentbernat/udpproxy
-
 udpproxy uses autotools. So, you should get ready with:
 
     $ autoreconf -i
