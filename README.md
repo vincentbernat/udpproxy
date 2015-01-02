@@ -42,6 +42,7 @@ or use [github][3].
 
 udpproxy uses autotools. So, you should get ready with:
 
+    $ autoreconf -i
     $ ./configure
     $ make
     $ sudo make install
