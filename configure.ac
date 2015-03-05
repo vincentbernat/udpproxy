@@ -14,13 +14,13 @@ AC_PROG_CC
 
 # Checks for libraries.
 AC_CHECK_LIB([nfnetlink], [nfnl_fd], [],
-        [AC_MSG_NOTICE([without nfnetlink library, only client support will be enabled])
+        [AC_MSG_NOTICE([*** without nfnetlink library, only client support will be enabled])
          AC_DEFINE([CLIENT_ONLY], 1, [Only compile client support])])
 AC_CHECK_LIB([netfilter_queue], [nfq_open], [],
-        [AC_MSG_NOTICE([without netfilter-queue, only client support will be enabled])
+        [AC_MSG_NOTICE([*** without netfilter-queue, only client support will be enabled])
          AC_DEFINE([CLIENT_ONLY], 1, [Only compile client support])])
 AC_CHECK_LIB([event], [event_set], [],
-	[AC_MSG_ERROR([libevent was not found])])
+	[AC_MSG_ERROR([*** libevent was not found])])
 
 # Checks for header files.
 AC_CHECK_HEADERS([sys/tree.h])
