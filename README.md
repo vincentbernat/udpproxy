@@ -8,7 +8,7 @@ selected with the help of iptables:
 
 For example:
 
-    # iptables -A OUTPUT -p udp --dport 161 \
+    # iptables -I OUTPUT -p udp --dport 161 \
        --destination 172.16.100.0/23 -j NFQUEUE --queue-num 10
 
 Then, udpproxy is launched and will relay the packets sent to queue
