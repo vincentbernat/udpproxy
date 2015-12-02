@@ -17,6 +17,8 @@
 #include "proxy.h"
 
 #include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
 #include <string.h>
 #if HAVE_SYS_TREE_H
 #include <sys/tree.h>

@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <time.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/ip.h>
