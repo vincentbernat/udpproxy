@@ -68,4 +68,4 @@ unprivileged user. You can use `-u` and `-g` switches for this:
 
 Or, with the help of the shell:
 
-    # udpproxy -u $(id -u) -g $(id -g) -e "ssh somehost ./udpproxy" -q 10
+    $ sudo udpproxy -u $(id -u) -g $(id -g) -e "ssh somehost ./udpproxy" -q 10
